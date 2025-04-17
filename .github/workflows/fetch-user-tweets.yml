@@ -25,4 +25,8 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          AI_SERVICE_URL: ${{ secrets.AI_SERVICE_URL }}
+          AI_SERVICE_TOKEN: ${{ secrets.AI_SERVICE_TOKEN }}
+          AI_SERVICE_MODEL: ${{ secrets.AI_SERVICE_MODEL }}
+          AI_SERVICE_TIMEOUT: ${{ secrets.AI_SERVICE_TIMEOUT }}
         run: bun run scripts/fetch-user-tweets.ts 
