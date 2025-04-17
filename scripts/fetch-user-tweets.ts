@@ -97,10 +97,44 @@ async function getUserTweets(userId: string, username: string) {
 
 // 3. 过滤推文
 function filterTweets(tweets: any[]) {
-  // 过滤掉推广内容
-  const filteredTweets = tweets.filter((tweet) => !tweet.promotedMetadata);
+  // 依次应用多个过滤器
+  const withoutPromoted = tweets.filter(filterPromotedContent);
+  const withoutOld = withoutPromoted.filter(filterOldTweets);
+  const filteredTweets = withoutOld.filter(filterRetweets);
+  
   console.log(`过滤后剩余 ${filteredTweets.length} 条推文`);
   return filteredTweets;
+}
+
+// 过滤推广内容
+function filterPromotedContent(tweet: any): boolean {
+  if (tweet.promotedMetadata) {
+    return false;
+  }
+  return true;
+}
+
+// 过滤超过30天的推文
+function filterOldTweets(tweet: any): boolean {
+  const createdAt = 
+    get(tweet, "raw.result.legacy.createdAt") || 
+    get(tweet, "tweet.legacy.createdAt");
+  if (createdAt && dayjs().diff(dayjs(createdAt), "day") > 30) {
+    console.log("跳过超过30天的推文");
+    return false;
+  }
+  return true;
+}
+
+// 过滤转发推文
+function filterRetweets(tweet: any): boolean {
+  const fullTextContent = get(tweet, "raw.result.legacy.fullText") || get(tweet, "tweet.legacy.fullText") || '';
+  const isRetweet = fullTextContent.startsWith('RT @') || get(tweet, "raw.result.legacy.isRetweet");
+  if (isRetweet) {
+    console.log("跳过转发推文");
+    return false;
+  }
+  return true;
 }
 
 // 4. 处理单条推文
@@ -116,19 +150,7 @@ async function processTweet(tweet: any) {
       get(tweet, "raw.result.legacy.createdAt") || 
       get(tweet, "tweet.legacy.createdAt");
     
-    console.log(`处理推文: ${screenName ? screenName : '未知用户'} - ${fullText ? fullText.substring(0, 50) : '无文本'}`);
-    
-    // 如果超过30天的推文，跳过
-    if (createdAt && dayjs().diff(dayjs(createdAt), "day") > 30) {
-      console.log("跳过超过30天的推文");
-      return;
-    }
-
-    // 如果推文是转发，跳过
-    if (get(tweet, "raw.result.legacy.isRetweet")) {
-      console.log("跳过转发推文");
-      return;
-    }
+    console.log(`处理推文: ${screenName ? screenName : '未知用户'}`);
 
     const tweetId = 
       get(tweet, "raw.result.legacy.idStr") || 
@@ -144,7 +166,7 @@ async function processTweet(tweet: any) {
     const tweetData = extractTweetData(tweet, screenName, tweetId);
     
     // 保存到 Supabase
-    // await saveToSupabase(tweetData);
+    await saveToSupabase(tweetData);
     
   } catch (tweetError) {
     console.error(`处理单条推文时出错:`, tweetError);
@@ -174,7 +196,13 @@ function extractTweetData(tweet: any, screenName: string, tweetId: string) {
     
   const images = mediaItems
     .filter((media: any) => media.type === "photo")
-    .map((media: any) => media.mediaUrlHttps);
+    .map((media: any) => {
+      const imgObj = {
+        url: media.mediaUrlHttps,
+        alt: media.extAltText,
+      };
+      return imgObj;
+    });
 
   // 提取视频
   const videos = mediaItems
