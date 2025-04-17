@@ -17,6 +17,22 @@
 
 ## 安装
 
+### 如何安装 Bun
+
+```bash
+# 使用 curl 安装（适用于 macOS、Linux 和 WSL）
+curl -fsSL https://bun.sh/install | bash
+
+# 使用 npm 安装
+npm install -g bun
+
+# 使用 Homebrew 安装（macOS）
+brew tap oven-sh/bun
+brew install bun
+```
+
+### 安装项目依赖
+
 ```bash
 bun install
 ```

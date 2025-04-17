@@ -6,7 +6,7 @@
   "hasGraduatedAccess": true,
   "highlightsInfo": {
     "canHighlightTweets": true,
-    "highlightedTweets": "5424"
+    "highlightedTweets": "5432"
   },
   "id": "VXNlcjoxMzg1NjE5NTMyODQxMTY4ODk4",
   "isBlueVerified": true,
@@ -34,17 +34,17 @@
       }
     },
     "fastFollowersCount": 0,
-    "favouritesCount": 121954,
-    "followersCount": 24142,
+    "favouritesCount": 121990,
+    "followersCount": 24199,
     "following": true,
-    "friendsCount": 1977,
+    "friendsCount": 1976,
     "hasCustomTimelines": true,
     "isTranslator": false,
-    "listedCount": 0,
+    "listedCount": 600,
     "location": "",
-    "mediaCount": 12931,
+    "mediaCount": 12938,
     "name": "LudovicCreator",
-    "normalFollowersCount": 24142,
+    "normalFollowersCount": 24199,
     "pinnedTweetIdsStr": [
       "1890340230831513966"
     ],
@@ -53,7 +53,7 @@
     "profileImageUrlHttps": "https://pbs.twimg.com/profile_images/1837006598415278081/ITK45Vh9_normal.jpg",
     "profileInterstitialType": "",
     "screenName": "LudovicCreator",
-    "statusesCount": 115675,
+    "statusesCount": 115708,
     "translatorType": "none",
     "verified": false,
     "wantRetweets": true,
