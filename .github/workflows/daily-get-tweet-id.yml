@@ -4,6 +4,9 @@ on:
   # schedule:
   #   - cron: '0 0 * * *'  # 每天运行
   workflow_dispatch:      # 允许手动触发
+  push:
+    paths:
+      - 'dev-accounts.json'  # 当此文件有变化时触发
 
 jobs:
   update-data:
