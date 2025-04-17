@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import fs from "fs-extra";
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import { createAIService } from "./ai-service";
 
 // 加载环境变量
 dotenv.config();
@@ -51,6 +52,56 @@ function debugObject(obj: any, label: string) {
     console.log("无法序列化对象:", error);
   }
   console.log(`=== END DEBUG ${label} ===`);
+}
+
+// 打印统计信息
+function printStats() {
+  console.log(`
+操作完成:
+- 添加了 ${stats.usersAdded} 个新用户
+- 更新了 ${stats.usersUpdated} 个现有用户
+- 添加了 ${stats.tweetsAdded} 条新推文
+- 遇到 ${stats.errors} 个错误
+`);
+}
+
+// 判断推文内容类型
+async function judgeContentType(tweetData: any) {
+  try {
+    // 创建AI服务实例
+    const aiService = createAIService();
+    
+    // 构建用户提示
+    let userPrompt = "";
+    userPrompt += `\n\n${tweetData.fullText}`;
+    userPrompt += `\n\n图片:\n\n`;
+    
+    // 添加图片信息
+    const images = tweetData.images || [];
+    for (let index = 0; index < images.length; index++) {
+      const image = images[index];
+      if (typeof image === 'string') {
+        userPrompt += `图片${index+1}:\nURL: ${image}\n`;
+      } else if (typeof image === 'object') {
+        userPrompt += `图片${index+1}:\nURL: ${image.url || ''}\nAlt: ${image.alt || ''}\n`;
+      }
+    }
+    
+    // console.log(`用户提示: ${userPrompt}`);
+    
+    // 调用AI服务进行内容类型分析
+    const result = await aiService.contentTypeAnalysis(userPrompt);
+    const contentType = result.content_type || 'unknown';
+    const analysisReason = result.analysis_reason || '';
+    const contentTypeScore = result.content_type_score || 0;
+    
+    console.log(`内容类型: ${contentType}\n分析原因: ${analysisReason}\n内容类型得分: ${contentTypeScore}`);
+    
+    return contentType;
+  } catch (error) {
+    console.error('判断内容类型时出错:', error);
+    return 'unknown';
+  }
 }
 
 // 1. 遍历用户并处理推文
@@ -165,8 +216,20 @@ async function processTweet(tweet: any) {
     // 提取数据
     const tweetData = extractTweetData(tweet, screenName, tweetId);
     
-    // 保存到 Supabase
-    await saveToSupabase(tweetData);
+    // 判断内容类型
+    const contentType = await judgeContentType(tweetData);
+    console.log(`推文内容类型: ${contentType}`);
+    
+    // 将内容类型添加到推文数据中
+    tweetData.contentType = contentType;
+    
+    // 对不同内容类型的处理
+    if (contentType === 'ai_draw') {
+      await handleAiDrawTweet(tweetData);
+    } else {
+      // 其他类型的推文仍然使用现有的保存流程
+      await saveToSupabase(tweetData);
+    }
     
   } catch (tweetError) {
     console.error(`处理单条推文时出错:`, tweetError);
@@ -233,7 +296,8 @@ function extractTweetData(tweet: any, screenName: string, tweetId: string) {
     fullText,
     createdAt,
     images,
-    videos
+    videos,
+    contentType: 'unknown' // 默认设置为unknown
   };
 }
 
@@ -317,6 +381,19 @@ async function saveUserToSupabase(user: any) {
   return userId;
 }
 
+// 处理AI绘画类型的推文
+async function handleAiDrawTweet(tweetData: any) {
+  // TODO: 实现专门的AI绘画处理逻辑
+  console.log(`处理AI绘画推文: ${JSON.stringify(tweetData, null, 2)}`);
+  // curl --location 'https://py-service.flyooo.uk/social/save_from_twitter_fetch' 
+  const response = await fetch('https://py-service.flyooo.uk/social/save_from_twitter_fetch', {
+    method: 'POST',
+    body: JSON.stringify(tweetData),
+  });
+  const data = await response.json();
+  console.log(`AI绘画推文处理结果: ${JSON.stringify(data, null, 2)}`);
+}
+
 // 保存推文到Supabase
 async function saveTweetToSupabase(tweetData: any, userId: number) {
   // 查找是否已存在该推文
@@ -343,7 +420,8 @@ async function saveTweetToSupabase(tweetData: any, userId: number) {
         full_text: tweetData.fullText,
         created_at: tweetData.createdAt,
         images: tweetData.images || [],
-        videos: tweetData.videos || []
+        videos: tweetData.videos || [],
+        content_type: tweetData.contentType || 'unknown' // 添加内容类型
       });
 
     if (insertTweetError) {
@@ -357,17 +435,6 @@ async function saveTweetToSupabase(tweetData: any, userId: number) {
   }
 }
 
-// 打印统计信息
-function printStats() {
-  console.log(`
-操作完成:
-- 添加了 ${stats.usersAdded} 个新用户
-- 更新了 ${stats.usersUpdated} 个现有用户
-- 添加了 ${stats.tweetsAdded} 条新推文
-- 遇到 ${stats.errors} 个错误
-`);
-}
-
 // 获取推文数据并保存到Supabase
 async function fetchAndSaveTweets() {
   await processAllUsers();
@@ -379,4 +446,3 @@ async function main() {
 }
 
 main().catch(console.error);
-

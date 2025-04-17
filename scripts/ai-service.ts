@@ -97,8 +97,8 @@ class AIService {
         data.response_format = { type: 'json_object' };
       }
       
-      console.log(`系统提示: ${systemPrompt}`);
-      console.log(`调用AI服务: URL: ${url}, 消息数量: ${messages.length}`);
+      // console.log(`系统提示: ${systemPrompt}`);
+      // console.log(`调用AI服务: URL: ${url}, 消息数量: ${messages.length}`);
       
       const startTime = Date.now();
       const response = await axios.post(url, data, {
