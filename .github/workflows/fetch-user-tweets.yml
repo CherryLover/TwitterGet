@@ -21,6 +21,7 @@ jobs:
         
       - name: 运行获取用户推文脚本
         env:
+          GET_ID_X_TOKEN: ${{ secrets.GET_ID_X_TOKEN }}
           AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
