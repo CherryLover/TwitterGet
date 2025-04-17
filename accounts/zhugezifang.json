@@ -1,0 +1,94 @@
+{
+  "typename": "User",
+  "affiliatesHighlightedLabel": {},
+  "businessAccount": {},
+  "creatorSubscriptionsCount": 0,
+  "hasGraduatedAccess": true,
+  "highlightsInfo": {
+    "canHighlightTweets": false,
+    "highlightedTweets": "0"
+  },
+  "id": "VXNlcjoxNjU4MDcxOTc1NTY5NTM0OTc3",
+  "isBlueVerified": false,
+  "isProfileTranslatable": false,
+  "legacy": {
+    "canDm": true,
+    "canMediaTag": true,
+    "createdAt": "Mon May 15 11:29:14 +0000 2023",
+    "defaultProfile": true,
+    "defaultProfileImage": false,
+    "description": "前大厂程序员\n在做的产品：https://t.co/eMVMTuiC2L\n在做的游戏站: https://t.co/g6YxhB7q7n",
+    "entities": {
+      "description": {
+        "urls": [
+          {
+            "display_url": "graph-maker.online",
+            "expanded_url": "https://graph-maker.online",
+            "url": "https://t.co/eMVMTuiC2L",
+            "indices": [
+              13,
+              36
+            ]
+          },
+          {
+            "display_url": "8090-game.online",
+            "expanded_url": "http://8090-game.online",
+            "url": "https://t.co/g6YxhB7q7n",
+            "indices": [
+              45,
+              68
+            ]
+          }
+        ]
+      },
+      "url": {
+        "urls": [
+          {
+            "display_url": "zgzf.online",
+            "expanded_url": "https://www.zgzf.online/",
+            "url": "https://t.co/aZ1lxUbTih",
+            "indices": [
+              0,
+              23
+            ]
+          }
+        ]
+      }
+    },
+    "fastFollowersCount": 0,
+    "favouritesCount": 7,
+    "followedBy": true,
+    "followersCount": 2854,
+    "following": true,
+    "friendsCount": 266,
+    "hasCustomTimelines": false,
+    "isTranslator": false,
+    "listedCount": 40,
+    "location": "",
+    "mediaCount": 261,
+    "name": "诸葛子房",
+    "normalFollowersCount": 2854,
+    "pinnedTweetIdsStr": [
+      "1846390381061329015"
+    ],
+    "possiblySensitive": false,
+    "profileImageUrlHttps": "https://pbs.twimg.com/profile_images/1658072040111484928/QhN2c5UM_normal.png",
+    "profileInterstitialType": "",
+    "screenName": "zhugezifang",
+    "statusesCount": 1130,
+    "translatorType": "none",
+    "url": "https://t.co/aZ1lxUbTih",
+    "verified": false,
+    "wantRetweets": true,
+    "withheldInCountries": []
+  },
+  "legacyExtendedProfile": {},
+  "premiumGiftingEligible": true,
+  "profileImageShape": "Circle",
+  "restId": "1658071975569534977",
+  "tipjarSettings": {},
+  "userSeedTweetCount": 0,
+  "verificationInfo": {
+    "isIdentityVerified": false
+  }
+}
