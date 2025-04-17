@@ -1,0 +1,28 @@
+name: 获取用户推文
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # 每30分钟运行
+  workflow_dispatch:      # 允许手动触发
+
+jobs:
+  fetch-user-tweets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+          
+      - name: 设置 Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+          
+      - name: 安装依赖
+        run: bun install
+        
+      - name: 运行获取用户推文脚本
+        env:
+          AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: bun run scripts/fetch-user-tweets.ts 
