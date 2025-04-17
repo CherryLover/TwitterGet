@@ -104,6 +104,47 @@ async function judgeContentType(tweetData: any) {
   }
 }
 
+// 检查推文是否已存在于 Supabase
+async function checkTweetExists(tweetId: string): Promise<boolean> {
+  try {
+    const { data: existingTweet, error: tweetQueryError } = await supabase
+      .from('cron_twitter_tweets')
+      .select('id')
+      .eq('tweet_id', tweetId)
+      .single();
+    
+    if (tweetQueryError && tweetQueryError.code !== 'PGRST116') {
+      console.error(`查询推文时出错: ${tweetQueryError.message}`);
+      stats.errors++;
+      return false;
+    }
+    
+    return !!existingTweet;
+  } catch (error) {
+    console.error(`检查推文是否存在时出错:`, error);
+    stats.errors++;
+    return false;
+  }
+}
+
+// 过滤已存在的推文
+async function filterExistingTweets(tweets: any[]): Promise<any[]> {
+  const filteredTweets = [];
+  for (const tweet of tweets) {
+    const tweetId = 
+      get(tweet, "raw.result.legacy.idStr") || 
+      get(tweet, "tweet.rest_id") || 
+      get(tweet, "tweet.legacy.id_str");
+      
+    if (tweetId && !(await checkTweetExists(tweetId))) {
+      filteredTweets.push(tweet);
+    } else {
+      console.log(`跳过已存在的推文: ${tweetId}`);
+    }
+  }
+  return filteredTweets;
+}
+
 // 1. 遍历用户并处理推文
 async function processAllUsers() {
   for (const account of devAccounts) {
@@ -114,7 +155,7 @@ async function processAllUsers() {
       const tweets = await getUserTweets(account.id, account.username);
       
       // 过滤推文
-      const filteredTweets = filterTweets(tweets);
+      const filteredTweets = await filterTweets(tweets);
       
       // 处理每条推文
       for (const tweet of filteredTweets) {
@@ -147,11 +188,14 @@ async function getUserTweets(userId: string, username: string) {
 }
 
 // 3. 过滤推文
-function filterTweets(tweets: any[]) {
+async function filterTweets(tweets: any[]) {
   // 依次应用多个过滤器
   const withoutPromoted = tweets.filter(filterPromotedContent);
   const withoutOld = withoutPromoted.filter(filterOldTweets);
-  const filteredTweets = withoutOld.filter(filterRetweets);
+  const withoutRetweets = withoutOld.filter(filterRetweets);
+  
+  // 过滤掉已存在的推文
+  const filteredTweets = await filterExistingTweets(withoutRetweets);
   
   console.log(`过滤后剩余 ${filteredTweets.length} 条推文`);
   return filteredTweets;
@@ -226,10 +270,10 @@ async function processTweet(tweet: any) {
     // 对不同内容类型的处理
     if (contentType === 'ai_draw') {
       await handleAiDrawTweet(tweetData);
-    } else {
-      // 其他类型的推文仍然使用现有的保存流程
-      await saveToSupabase(tweetData);
     }
+
+    // 其他类型的推文仍然使用现有的保存流程,为了加上过滤，所以 ai 的也保存
+    await saveToSupabase(tweetData);
     
   } catch (tweetError) {
     console.error(`处理单条推文时出错:`, tweetError);
