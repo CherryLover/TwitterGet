@@ -385,9 +385,11 @@ async function saveUserToSupabase(user: any) {
 async function handleAiDrawTweet(tweetData: any) {
   // TODO: 实现专门的AI绘画处理逻辑
   console.log(`处理AI绘画推文: ${JSON.stringify(tweetData, null, 2)}`);
-  // curl --location 'https://py-service.flyooo.uk/social/save_from_twitter_fetch' 
   const response = await fetch('https://py-service.flyooo.uk/social/save_from_twitter_fetch', {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify(tweetData),
   });
   const data = await response.json();
