@@ -15,6 +15,8 @@ dotenv.config();
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
 
+const debug = (process.env.DEBUG || 'false') === 'true';
+
 if (!supabaseUrl || !supabaseKey) {
   console.error('错误: 缺少SUPABASE_URL或SUPABASE_ANON_KEY环境变量');
   process.exit(1);
@@ -179,9 +181,11 @@ async function getUserTweets(userId: string, username: string) {
   console.log(`用户 ${username} 的推文API调用已完成`);
   console.log(`找到 ${resp.data.data.length} 条推文`);
   
-  for(let index = 0; index < resp.data.data.length; index++) {
-    const tweet = resp.data.data[index];
-    debugObject(tweet, `temp-${index}`);
+  if (debug) {
+    for(let index = 0; index < resp.data.data.length; index++) {
+      const tweet = resp.data.data[index];
+      debugObject(tweet, `temp-${index}`);
+    }
   }
   
   return resp.data.data;
