@@ -3,6 +3,9 @@
 *.swp
 .env
 
+# 调试文件
+debug/*
+
 /.cargo_home/
 /.idea/
 /.vs/

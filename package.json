@@ -24,6 +24,7 @@
   },
   "scripts": {
     "fetch-tweets": "ts-node scripts/fetch-user-tweets.ts",
-    "save-to-supabase": "ts-node scripts/save-tweets-to-supabase.ts"
+    "save-to-supabase": "ts-node scripts/save-tweets-to-supabase.ts",
+    "analyze-tweet": "bun scripts/analyze_tweet.js"
   }
 }

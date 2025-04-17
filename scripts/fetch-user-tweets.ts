@@ -40,7 +40,7 @@ function debugObject(obj: any, label: string) {
   try {
     //console.log(JSON.stringify(obj, null, 2).substring(0, 500) + "...");
     // 将对象保存为临时JSON文件
-    const debugFilePath = `./debug/${label}-${Date.now()}.json`;
+    const debugFilePath = `./debug/${label}.json`;
     fs.ensureDirSync('./debug');
     fs.writeFileSync(
       debugFilePath,
@@ -87,8 +87,9 @@ async function getUserTweets(userId: string, username: string) {
   console.log(`用户 ${username} 的推文API调用已完成`);
   console.log(`找到 ${resp.data.data.length} 条推文`);
   
-  if (resp.data.data.length > 0) {
-    debugObject(resp.data.data[0], "第一条推文结构");
+  for(let index = 0; index < resp.data.data.length; index++) {
+    const tweet = resp.data.data[index];
+    debugObject(tweet, `temp-${index}`);
   }
   
   return resp.data.data;
