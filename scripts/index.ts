@@ -14,12 +14,12 @@ interface Account {
 const updatedAccounts: Account[] = [...accounts];
 const appendedAccounts: Account[] = [];
 
+const client = await xGuestClient();
 for (const account of accounts) {
   if (fs.existsSync(`./accounts/${account.username}.json`)) {
     console.log(`${account.username} already exists`);
   }
 
-  const client = await xGuestClient();
   let user: any = {};
   try {
     user = await client.getUserApi().getUserByScreenName({screenName: account.username});
@@ -33,11 +33,10 @@ for (const account of accounts) {
       if (userIdBase64) {
         // 解码 userIdBase64
         const userId = Buffer.from(userIdBase64, 'base64').toString('utf-8').split(':')[1];
-        console.log(`${account.username} id: ${userId}`);
-        for (const account of updatedAccounts) {
-          if (account.username === account.username) {
-            account.id = userId;
-          }
+        console.log(`${account.username} id: ${userId} accountId ${account.id}`);
+        if (account.id !== userId) {
+          account.id = userId;
+          console.log(`更新用户 ${account.username} id: ${userId}`);
         }
       }
     } else {
