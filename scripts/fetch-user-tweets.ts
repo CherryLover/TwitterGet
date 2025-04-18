@@ -287,7 +287,11 @@ async function processTweet(tweet: any) {
     
     // 对不同内容类型的处理
     if (contentType === 'ai_draw') {
-      await handleAiDrawTweet(tweetData);
+      const success = await handleAiDrawTweet(tweetData);
+      if (!success) {
+        console.log(`AI绘画推文处理失败, 不保存到 supabase: ${tweetData.tweetUrl}`);
+        return;
+      }
     }
 
     // 其他类型的推文仍然使用现有的保存流程,为了加上过滤，所以 ai 的也保存
@@ -456,6 +460,8 @@ async function handleAiDrawTweet(tweetData: any) {
   });
   const data = await response.json();
   console.log(`AI绘画推文处理结果: ${JSON.stringify(data, null, 2)}`);
+  // 判断 不成功 则 返回 false
+  return data.success;
 }
 
 // 保存推文到Supabase
