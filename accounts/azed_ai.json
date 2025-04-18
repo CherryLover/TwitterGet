@@ -6,7 +6,7 @@
   "hasGraduatedAccess": true,
   "highlightsInfo": {
     "canHighlightTweets": true,
-    "highlightedTweets": "1273"
+    "highlightedTweets": "1274"
   },
   "id": "VXNlcjoxNTM4NjYxNjM1OTIxMDA2NTky",
   "isBlueVerified": true,
@@ -34,17 +34,17 @@
       }
     },
     "fastFollowersCount": 0,
-    "favouritesCount": 98445,
-    "followersCount": 19798,
+    "favouritesCount": 98561,
+    "followersCount": 19957,
     "following": true,
-    "friendsCount": 688,
+    "friendsCount": 689,
     "hasCustomTimelines": true,
     "isTranslator": false,
-    "listedCount": 325,
+    "listedCount": 330,
     "location": "Algeria",
-    "mediaCount": 11686,
+    "mediaCount": 11690,
     "name": "Amira Zairi",
-    "normalFollowersCount": 19798,
+    "normalFollowersCount": 19957,
     "pinnedTweetIdsStr": [
       "1912545054243307918"
     ],
@@ -53,7 +53,7 @@
     "profileImageUrlHttps": "https://pbs.twimg.com/profile_images/1890156284688605184/-A5Q6izz_normal.jpg",
     "profileInterstitialType": "",
     "screenName": "azed_ai",
-    "statusesCount": 78295,
+    "statusesCount": 78385,
     "translatorType": "none",
     "verified": false,
     "wantRetweets": true,

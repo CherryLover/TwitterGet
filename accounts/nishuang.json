@@ -2,59 +2,63 @@
   "typename": "User",
   "affiliatesHighlightedLabel": {},
   "businessAccount": {},
-  "creatorSubscriptionsCount": 3,
+  "creatorSubscriptionsCount": 0,
   "hasGraduatedAccess": true,
   "highlightsInfo": {
     "canHighlightTweets": true,
-    "highlightedTweets": "5443"
+    "highlightedTweets": "31"
   },
-  "id": "VXNlcjoxMzg1NjE5NTMyODQxMTY4ODk4",
+  "id": "VXNlcjoyMDU4ODk3MA==",
   "isBlueVerified": true,
   "isProfileTranslatable": false,
   "legacy": {
     "canDm": true,
     "canMediaTag": false,
-    "createdAt": "Fri Apr 23 15:40:29 +0000 2021",
-    "defaultProfile": true,
+    "createdAt": "Wed Feb 11 13:17:01 +0000 2009",
+    "defaultProfile": false,
     "defaultProfileImage": false,
-    "description": "AI VFX TEAM House of David S 2 @watchonwonder\n\nLeonardo  LCP\n\nTWIN AI / KLING AI/RUNWAY /HAILUO / LUMA / NIM / PIKA  CPP\n\nGenIArt https://t.co/4PWgTsMRMh",
+    "description": "倪爽，设计顾问。 超过 20 年经验资深设计师，在美国运营 Honest Dot Design / 倪爽设计工作室，为中国及北美企业提供品牌营销设计、UX 设计两类设计咨询服务",
     "entities": {
       "description": {
+        "urls": []
+      },
+      "url": {
         "urls": [
           {
-            "display_url": "discord.gg/geniart",
-            "expanded_url": "https://discord.gg/geniart",
-            "url": "https://t.co/4PWgTsMRMh",
+            "display_url": "nishuang.net",
+            "expanded_url": "https://nishuang.net/",
+            "url": "https://t.co/kn7zsOTWuW",
             "indices": [
-              130,
-              153
+              0,
+              23
             ]
           }
         ]
       }
     },
     "fastFollowersCount": 0,
-    "favouritesCount": 122025,
-    "followersCount": 24290,
+    "favouritesCount": 22134,
+    "followersCount": 101868,
     "following": true,
-    "friendsCount": 1977,
+    "friendsCount": 805,
     "hasCustomTimelines": true,
     "isTranslator": false,
-    "listedCount": 600,
-    "location": "",
-    "mediaCount": 12952,
-    "name": "LudovicCreator",
-    "normalFollowersCount": 24290,
+    "listedCount": 1029,
+    "location": "United States",
+    "mediaCount": 15508,
+    "name": "倪爽",
+    "normalFollowersCount": 101868,
     "pinnedTweetIdsStr": [
-      "1890340230831513966"
+      "1902092248306643441"
     ],
     "possiblySensitive": false,
-    "profileBannerUrl": "https://pbs.twimg.com/profile_banners/1385619532841168898/1733677062",
-    "profileImageUrlHttps": "https://pbs.twimg.com/profile_images/1837006598415278081/ITK45Vh9_normal.jpg",
+    "profileBannerUrl": "https://pbs.twimg.com/profile_banners/20588970/1720543960",
+    "profileImageUrlHttps": "https://pbs.twimg.com/profile_images/1615204555/bg_green_300x300_normal.jpg",
     "profileInterstitialType": "",
-    "screenName": "LudovicCreator",
-    "statusesCount": 115769,
+    "screenName": "nishuang",
+    "statusesCount": 42133,
     "translatorType": "none",
+    "url": "https://t.co/kn7zsOTWuW",
     "verified": false,
     "wantRetweets": true,
     "withheldInCountries": []
@@ -62,22 +66,16 @@
   "legacyExtendedProfile": {},
   "premiumGiftingEligible": false,
   "professional": {
-    "category": [
-      {
-        "iconName": "IconBriefcaseStroke",
-        "id": 1042,
-        "name": "Content Creator"
-      }
-    ],
+    "category": [],
     "professionalType": "Business",
-    "restId": "1662294225461948416"
+    "restId": "1793644639108403291"
   },
   "profileImageShape": "Circle",
-  "restId": "1385619532841168898",
+  "restId": "20588970",
   "tipjarSettings": {},
   "userSeedTweetCount": 0,
   "verificationInfo": {
-    "isIdentityVerified": true,
+    "isIdentityVerified": false,
     "reason": {
       "description": {
         "entities": [
@@ -92,7 +90,7 @@
         ],
         "text": "This account is verified. Learn more"
       },
-      "verifiedSinceMsec": "1743767240017"
+      "verifiedSinceMsec": "1676339570586"
     }
   }
 }
