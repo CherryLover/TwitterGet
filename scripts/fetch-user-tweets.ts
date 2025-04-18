@@ -70,8 +70,6 @@ function printStats() {
 // 判断推文内容类型
 async function judgeContentType(tweetData: any) {
   try {
-    // 创建AI服务实例
-    const aiService = createAIService();
     
     // 构建用户提示
     let userPrompt = "";
@@ -79,6 +77,8 @@ async function judgeContentType(tweetData: any) {
     userPrompt += `\n\n图片:\n\n`;
     
     // 添加图片信息
+    let imgUrlCount = 0;
+    let imgAltCount = 0;
     const images = tweetData.images || [];
     for (let index = 0; index < images.length; index++) {
       const image = images[index];
@@ -86,8 +86,22 @@ async function judgeContentType(tweetData: any) {
         userPrompt += `图片${index+1}:\nURL: ${image}\n`;
       } else if (typeof image === 'object') {
         userPrompt += `图片${index+1}:\nURL: ${image.url || ''}\nAlt: ${image.alt || ''}\n`;
+        if (image.url) {
+          imgUrlCount++;
+        }
+        if (image.alt) {
+          imgAltCount++;
+        }
       }
     }
+    // 如果图片数量小于2，则认为是帖子，AI 绘图需要图片 + 描述
+    if (imgUrlCount < 2  || imgAltCount < 2) {
+      return 'post';
+    }
+
+
+    // 创建AI服务实例
+    const aiService = createAIService();
     
     // console.log(`用户提示: ${userPrompt}`);
     
