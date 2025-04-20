@@ -461,7 +461,9 @@ async function handleAiDrawTweet(tweetData: any) {
   const data = await response.json();
   console.log(`AI绘画推文处理结果: ${JSON.stringify(data, null, 2)}`);
   // 判断 不成功 则 返回 false
-  return data.success;
+  console.log("response code ", response.status);
+  console.log("response data code ", data.code);
+  return response.status === 200;
 }
 
 // 保存推文到Supabase
