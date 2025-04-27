@@ -6,18 +6,18 @@
   "hasGraduatedAccess": true,
   "highlightsInfo": {
     "canHighlightTweets": true,
-    "highlightedTweets": "31"
+    "highlightedTweets": "122"
   },
-  "id": "VXNlcjoyMDU4ODk3MA==",
+  "id": "VXNlcjoxNjY5Mjc2MjU2",
   "isBlueVerified": true,
   "isProfileTranslatable": false,
   "legacy": {
     "canDm": true,
     "canMediaTag": false,
-    "createdAt": "Wed Feb 11 13:17:01 +0000 2009",
-    "defaultProfile": false,
+    "createdAt": "Wed Aug 14 02:18:36 +0000 2013",
+    "defaultProfile": true,
     "defaultProfileImage": false,
-    "description": "倪爽，设计顾问。 超过 20 年经验资深设计师，在美国运营 Honest Dot Design / 倪爽设计工作室，为中国及北美企业提供品牌营销设计、UX 设计两类设计咨询服务",
+    "description": "关注人工智能、LLM 、 AI 图像视频和设计（Interested in AI, LLM, Stable Diffusion, and design）\n\nAIGC 周刊主理人｜公众号：歸藏的AI工具箱",
     "entities": {
       "description": {
         "urls": []
@@ -25,9 +25,9 @@
       "url": {
         "urls": [
           {
-            "display_url": "nishuang.net",
-            "expanded_url": "https://nishuang.net/",
-            "url": "https://t.co/kn7zsOTWuW",
+            "display_url": "guizang.ai",
+            "expanded_url": "https://www.guizang.ai/",
+            "url": "https://t.co/YJB89MQglx",
             "indices": [
               0,
               23
@@ -37,43 +37,38 @@
       }
     },
     "fastFollowersCount": 0,
-    "favouritesCount": 22115,
-    "followersCount": 101938,
+    "favouritesCount": 28811,
+    "followersCount": 84420,
     "following": true,
-    "friendsCount": 805,
+    "friendsCount": 1144,
     "hasCustomTimelines": true,
     "isTranslator": false,
-    "listedCount": 1030,
-    "location": "United States",
-    "mediaCount": 15508,
-    "name": "倪爽",
-    "normalFollowersCount": 101938,
+    "listedCount": 1464,
+    "location": "",
+    "mediaCount": 5352,
+    "name": "歸藏(guizang.ai)",
+    "normalFollowersCount": 84420,
     "pinnedTweetIdsStr": [
-      "1902092248306643441"
+      "1915337361086656860"
     ],
     "possiblySensitive": false,
-    "profileBannerUrl": "https://pbs.twimg.com/profile_banners/20588970/1720543960",
-    "profileImageUrlHttps": "https://pbs.twimg.com/profile_images/1615204555/bg_green_300x300_normal.jpg",
+    "profileBannerUrl": "https://pbs.twimg.com/profile_banners/1669276256/1706450781",
+    "profileImageUrlHttps": "https://pbs.twimg.com/profile_images/1636981205504786434/xDl77JIw_normal.jpg",
     "profileInterstitialType": "",
-    "screenName": "nishuang",
-    "statusesCount": 42133,
+    "screenName": "op7418",
+    "statusesCount": 17082,
     "translatorType": "none",
-    "url": "https://t.co/kn7zsOTWuW",
+    "url": "https://t.co/YJB89MQglx",
     "verified": false,
     "wantRetweets": true,
     "withheldInCountries": []
   },
   "legacyExtendedProfile": {},
   "premiumGiftingEligible": false,
-  "professional": {
-    "category": [],
-    "professionalType": "Business",
-    "restId": "1793644639108403291"
-  },
   "profileImageShape": "Circle",
-  "restId": "20588970",
+  "restId": "1669276256",
   "tipjarSettings": {},
-  "userSeedTweetCount": 0,
+  "userSeedTweetCount": 2,
   "verificationInfo": {
     "isIdentityVerified": false,
     "reason": {
@@ -90,7 +85,7 @@
         ],
         "text": "This account is verified. Learn more"
       },
-      "verifiedSinceMsec": "1676339570586"
+      "verifiedSinceMsec": "1680370362973"
     }
   }
 }

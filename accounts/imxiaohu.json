@@ -1,0 +1,110 @@
+{
+  "typename": "User",
+  "affiliatesHighlightedLabel": {},
+  "businessAccount": {},
+  "creatorSubscriptionsCount": 0,
+  "hasGraduatedAccess": true,
+  "highlightsInfo": {
+    "canHighlightTweets": true,
+    "highlightedTweets": "966"
+  },
+  "id": "VXNlcjoxNzY0ODE4MzMxODIyMTgyNDAw",
+  "isBlueVerified": true,
+  "isProfileTranslatable": false,
+  "legacy": {
+    "canDm": true,
+    "canMediaTag": true,
+    "createdAt": "Tue Mar 05 01:01:23 +0000 2024",
+    "defaultProfile": true,
+    "defaultProfileImage": false,
+    "description": "Weibo 527w 超高过气科技博主、WaytoAGI之鹿饲养员、https://t.co/7dEiCJ7Us5首席编撰官！\n\n会员服务：https://t.co/wxu0447S0I",
+    "entities": {
+      "description": {
+        "urls": [
+          {
+            "display_url": "XiaoHu.AI",
+            "expanded_url": "http://XiaoHu.AI",
+            "url": "https://t.co/7dEiCJ7Us5",
+            "indices": [
+              34,
+              57
+            ]
+          },
+          {
+            "display_url": "xiaohu.ai/c/start-here/x…",
+            "expanded_url": "https://www.xiaohu.ai/c/start-here/xiaohu-ai-vip",
+            "url": "https://t.co/wxu0447S0I",
+            "indices": [
+              70,
+              93
+            ]
+          }
+        ]
+      },
+      "url": {
+        "urls": [
+          {
+            "display_url": "xiaohu.ai",
+            "expanded_url": "http://xiaohu.ai",
+            "url": "https://t.co/4PVaHEr5r3",
+            "indices": [
+              0,
+              23
+            ]
+          }
+        ]
+      }
+    },
+    "fastFollowersCount": 0,
+    "favouritesCount": 1556,
+    "followersCount": 66508,
+    "following": true,
+    "friendsCount": 1363,
+    "hasCustomTimelines": false,
+    "isTranslator": false,
+    "listedCount": 762,
+    "location": "Mars",
+    "mediaCount": 3716,
+    "name": "小互",
+    "normalFollowersCount": 66508,
+    "pinnedTweetIdsStr": [],
+    "possiblySensitive": false,
+    "profileBannerUrl": "https://pbs.twimg.com/profile_banners/1764818331822182400/1717126346",
+    "profileImageUrlHttps": "https://pbs.twimg.com/profile_images/1765404718959095808/BX7VN1hS_normal.jpg",
+    "profileInterstitialType": "",
+    "screenName": "imxiaohu",
+    "statusesCount": 5994,
+    "translatorType": "none",
+    "url": "https://t.co/4PVaHEr5r3",
+    "verified": false,
+    "wantRetweets": true,
+    "withheldInCountries": []
+  },
+  "legacyExtendedProfile": {},
+  "premiumGiftingEligible": false,
+  "profileImageShape": "Circle",
+  "restId": "1764818331822182400",
+  "tipjarSettings": {
+    "isEnabled": true
+  },
+  "userSeedTweetCount": 0,
+  "verificationInfo": {
+    "isIdentityVerified": true,
+    "reason": {
+      "description": {
+        "entities": [
+          {
+            "fromIndex": 26,
+            "ref": {
+              "url": "https://help.twitter.com/managing-your-account/about-twitter-verified-accounts",
+              "urlType": "ExternalUrl"
+            },
+            "toIndex": 36
+          }
+        ],
+        "text": "This account is verified. Learn more"
+      },
+      "verifiedSinceMsec": "1710073849038"
+    }
+  }
+}
