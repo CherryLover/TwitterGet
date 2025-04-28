@@ -14,6 +14,7 @@
 
 - 2024-12-24 添加每日发布推文功能 `post-twitter-daily.yml` `post-tweet.ts`
 - 2025-01-02 添加获取用户推文功能 `fetch-user-tweets.ts`
+- 2025-01-10 优化数据结构，使用 rest_id 替代 user_id 关联
 
 ## 安装
 

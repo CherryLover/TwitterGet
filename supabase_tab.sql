@@ -16,12 +16,13 @@ CREATE TABLE cron_twitter_users (
 CREATE TABLE cron_twitter_tweets (
   id SERIAL PRIMARY KEY,
   tweet_id TEXT NOT NULL UNIQUE,
-  user_id INTEGER REFERENCES cron_twitter_users(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES cron_twitter_users_ext(rest_id) ON DELETE CASCADE, -- 使用rest_id作为用户标识符
   tweet_url TEXT NOT NULL,
   full_text TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   images JSONB DEFAULT '[]'::JSONB,  -- 使用JSONB数组存储图片URL
   videos JSONB DEFAULT '[]'::JSONB,  -- 使用JSONB数组存储视频URL
+  content_type TEXT DEFAULT 'unknown', -- 内容类型：post, ai_draw, unknown等
   collected_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -49,5 +50,5 @@ CREATE TABLE cron_twitter_users_ext (
   
   -- 时间戳
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),     -- 记录创建时间
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),     -- 记录更新时间
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()     -- 记录更新时间
 );

@@ -47,8 +47,6 @@ const client = await XAuthClient();
 
 // 统计计数器
 const stats = {
-  usersAdded: 0,
-  usersUpdated: 0,
   tweetsAdded: 0,
   errors: 0
 };
@@ -76,8 +74,6 @@ function debugObject(obj: any, label: string) {
 function printStats() {
   console.log(`
 操作完成:
-- 添加了 ${stats.usersAdded} 个新用户
-- 更新了 ${stats.usersUpdated} 个现有用户
 - 添加了 ${stats.tweetsAdded} 条新推文
 - 遇到 ${stats.errors} 个错误
 `);
@@ -99,6 +95,7 @@ async function getUsersFromDatabase() {
       .select('id, rest_id, name, screen_name')
       .not('rest_id', 'is', null)
       .not('screen_name', 'is', null)
+      .eq('fetch_enable', true)
       .limit(userLimit);
     
     if (error) {
@@ -262,6 +259,7 @@ async function processAllUsers() {
       
       // 处理每条推文
       for (const tweet of filteredTweets) {
+        tweet.runtime_rest_id = account.id;
         await processTweet(tweet);
       }
       
@@ -410,8 +408,12 @@ async function processTweet(tweet: any) {
 function extractTweetData(tweet: any, screenName: string, tweetId: string) {
   const tweetUrl = `https://x.com/${screenName}/status/${tweetId}`;
 
+  // 提取rest_id (用户唯一标识符)
+  const restId = get(tweet, "user.rest_id") || get(tweet, "raw.result.core.user_results.result.rest_id") || '';
+
   // 提取用户信息
   const user = {
+    restId: tweet.runtime_rest_id, // 添加rest_id字段
     screenName: screenName,
     name: get(tweet, "user.legacy.name"),
     profileImageUrl: get(tweet, "user.legacy.profileImageUrlHttps"),
@@ -466,88 +468,24 @@ function extractTweetData(tweet: any, screenName: string, tweetId: string) {
     createdAt,
     images,
     videos,
+    restId, // 直接在顶层也保存rest_id
     contentType: 'unknown' // 默认设置为unknown
   };
 }
 
 // 5. 保存到 Supabase
 async function saveToSupabase(tweetData: any) {
-  // 保存用户到Supabase
-  const userId = await saveUserToSupabase(tweetData.user);
-  if (!userId) return;
+  // 获取Twitter用户的rest_id作为关联ID
+  const userId = tweetData.user.screenName;
+  const restId = tweetData.restId || tweetData.user.restId || '';
+  
+  if (!userId || !restId) {
+    console.log(`跳过缺少用户名或restId的推文: ${tweetData.tweetUrl}`);
+    return;
+  }
   
   // 保存推文到Supabase
-  await saveTweetToSupabase(tweetData, userId);
-}
-
-// 保存用户到Supabase
-async function saveUserToSupabase(user: any) {
-  // 查找是否已存在该用户
-  let { data: existingUser, error: userQueryError } = await supabase
-    .from('cron_twitter_users')
-    .select('id')
-    .eq('screen_name', user.screenName)
-    .single();
-  
-  if (userQueryError && userQueryError.code !== 'PGRST116') {
-    console.error(`查询用户时出错: ${userQueryError.message}`);
-    stats.errors++;
-    return null;
-  }
-  
-  let userId;
-  
-  // 如果用户不存在，创建新用户
-  if (!existingUser) {
-    const { data: newUser, error: insertUserError } = await supabase
-      .from('cron_twitter_users')
-      .insert({
-        screen_name: user.screenName,
-        name: user.name || user.screenName,
-        profile_image_url: user.profileImageUrl,
-        description: user.description,
-        followers_count: user.followersCount,
-        friends_count: user.friendsCount,
-        location: user.location
-      })
-      .select('id')
-      .single();
-
-    if (insertUserError) {
-      console.error(`创建用户时出错: ${insertUserError.message}`);
-      stats.errors++;
-      return null;
-    }
-
-    userId = newUser.id;
-    stats.usersAdded++;
-    console.log(`创建了新用户: ${user.screenName}`);
-  } else {
-    userId = existingUser.id;
-    
-    // 更新用户信息
-    const { error: updateUserError } = await supabase
-      .from('cron_twitter_users')
-      .update({
-        name: user.name || user.screenName,
-        profile_image_url: user.profileImageUrl,
-        description: user.description,
-        followers_count: user.followersCount,
-        friends_count: user.friendsCount,
-        location: user.location,
-        updated_at: new Date()
-      })
-      .eq('id', userId);
-    
-    if (updateUserError) {
-      console.error(`更新用户时出错: ${updateUserError.message}`);
-      stats.errors++;
-    } else {
-      stats.usersUpdated++;
-    }
-  }
-  
-  return userId;
+  await saveTweetToSupabase(tweetData, userId, restId);
 }
 
 // 处理AI绘画类型的推文
@@ -570,7 +508,7 @@ async function handleAiDrawTweet(tweetData: any) {
 }
 
 // 保存推文到Supabase
-async function saveTweetToSupabase(tweetData: any, userId: number) {
+async function saveTweetToSupabase(tweetData: any, userId: string, restId: string) {
   // 查找是否已存在该推文
   const { data: existingTweet, error: tweetQueryError } = await supabase
     .from('cron_twitter_tweets')
@@ -590,13 +528,13 @@ async function saveTweetToSupabase(tweetData: any, userId: number) {
       .from('cron_twitter_tweets')
       .insert({
         tweet_id: tweetData.tweetId,
-        user_id: userId,
+        user_id: restId, // 使用Twitter API的rest_id作为user_id
         tweet_url: tweetData.tweetUrl,
         full_text: tweetData.fullText,
         created_at: tweetData.createdAt,
         images: tweetData.images || [],
         videos: tweetData.videos || [],
-        content_type: tweetData.contentType || 'unknown' // 添加内容类型
+        content_type: tweetData.contentType || 'unknown'
       });
 
     if (insertTweetError) {
