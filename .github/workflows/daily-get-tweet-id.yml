@@ -1,4 +1,4 @@
-name: Get Tweet ID
+name: 获取用户信息
 
 on:
   # schedule:
