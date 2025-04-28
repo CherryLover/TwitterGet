@@ -1,17 +1,3 @@
--- 用户表
-CREATE TABLE cron_twitter_users (
-  id SERIAL PRIMARY KEY,
-  screen_name TEXT NOT NULL UNIQUE,
-  name TEXT NOT NULL,
-  profile_image_url TEXT,
-  description TEXT,
-  followers_count INTEGER,
-  friends_count INTEGER,
-  location TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 -- 推文表，images和videos直接存为JSON数组
 CREATE TABLE cron_twitter_tweets (
   id SERIAL PRIMARY KEY,
@@ -26,7 +12,7 @@ CREATE TABLE cron_twitter_tweets (
   collected_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 新增扩展用户表，包含完整信息但重点关注特定字段
+-- 用户表，包含完整信息但重点关注特定字段
 CREATE TABLE cron_twitter_users_ext (
   id SERIAL PRIMARY KEY,
   rest_id TEXT NOT NULL UNIQUE,       -- Twitter API 返回的用户唯一标识
