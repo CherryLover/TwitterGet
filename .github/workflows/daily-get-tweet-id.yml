@@ -24,5 +24,8 @@ jobs:
       - name: Run fetch script
         env:
           GET_ID_X_TOKEN: ${{ secrets.GET_ID_X_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           bun scripts/refresh-users.ts
