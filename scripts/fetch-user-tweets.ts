@@ -1,3 +1,20 @@
+/**
+ * Twitter用户推文获取脚本
+ * 
+ * 该脚本从Supabase数据库中获取Twitter用户列表，然后获取每个用户的最新推文，
+ * 并将新推文保存到Supabase数据库中。
+ * 
+ * 环境变量配置:
+ * - SUPABASE_URL: Supabase项目URL
+ * - SUPABASE_ANON_KEY 或 SUPABASE_KEY: Supabase项目密钥
+ * - DEBUG: 设置为'true'开启调试模式
+ * - USER_LIMIT: 要处理的用户数量限制，默认100
+ * 
+ * 使用方式:
+ * 1. 设置环境变量
+ * 2. 运行 `npm run fetch-tweets` 或 `ts-node scripts/fetch-user-tweets.ts`
+ */
+
 import type { TweetApiUtilsData } from "twitter-openapi-typescript";
 import * as i from "twitter-openapi-typescript-generated";
 import { XAuthClient } from "./utils";
@@ -25,8 +42,7 @@ if (!supabaseUrl || !supabaseKey) {
 // 创建Supabase客户端
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// 读取开发者账号文件
-const devAccounts = JSON.parse(fs.readFileSync("dev-accounts.json", "utf-8"));
+// 初始化Twitter客户端
 const client = await XAuthClient();
 
 // 统计计数器
@@ -65,6 +81,48 @@ function printStats() {
 - 添加了 ${stats.tweetsAdded} 条新推文
 - 遇到 ${stats.errors} 个错误
 `);
+}
+
+// 从数据库中获取Twitter用户列表
+async function getUsersFromDatabase() {
+  try {
+    console.log('从数据库中查询Twitter用户列表...');
+    
+    // 获取环境变量中的用户限制
+    const userLimit = process.env.USER_LIMIT ? parseInt(process.env.USER_LIMIT) : 100; // 限制用户数量，避免API超限
+    
+    console.log(`最多获取 ${userLimit} 个用户`);
+    
+    // 查询用户表，获取有rest_id和screen_name的用户
+    const { data: users, error } = await supabase
+      .from('cron_twitter_users_ext')
+      .select('id, rest_id, name, screen_name')
+      .not('rest_id', 'is', null)
+      .not('screen_name', 'is', null)
+      .limit(userLimit);
+    
+    if (error) {
+      console.error('查询用户列表时出错:', error.message);
+      return [];
+    }
+    
+    if (!users || users.length === 0) {
+      console.warn('数据库中没有找到有效的Twitter用户');
+      return [];
+    }
+    
+    console.log(`从数据库中找到 ${users.length} 个用户`);
+    
+    // 转换为所需格式
+    return users.map(user => ({
+      id: user.rest_id,
+      username: user.screen_name,
+      name: user.name
+    }));
+  } catch (error) {
+    console.error('从数据库获取用户列表时出错:', error);
+    return [];
+  }
 }
 
 // 判断推文内容类型
@@ -163,20 +221,54 @@ async function filterExistingTweets(tweets: any[]): Promise<any[]> {
 
 // 1. 遍历用户并处理推文
 async function processAllUsers() {
-  for (const account of devAccounts) {
+  // 从数据库获取用户列表
+  const userAccounts = await getUsersFromDatabase();
+  
+  if (userAccounts.length === 0) {
+    console.log('没有找到用户，请确保数据库中有用户数据');
+    return;
+  }
+  
+  let processedUserCount = 0;
+  const totalUsers = userAccounts.length;
+  
+  for (const account of userAccounts) {
     try {
-      console.log(`获取用户 ${account.username} (ID: ${account.id}) 的推文`);
+      processedUserCount++;
+      console.log(`[${processedUserCount}/${totalUsers}] 获取用户 ${account.username} (ID: ${account.id}) 的推文`);
+      
+      if (!account.id) {
+        console.log(`跳过用户 ${account.username}：缺少有效的用户ID`);
+        continue;
+      }
       
       // 获取推文
       const tweets = await getUserTweets(account.id, account.username);
       
+      if (tweets.length === 0) {
+        console.log(`用户 ${account.username} 没有新推文需要处理`);
+        continue;
+      }
+      
       // 过滤推文
       const filteredTweets = await filterTweets(tweets);
+      
+      if (filteredTweets.length === 0) {
+        console.log(`用户 ${account.username} 的所有推文都被过滤掉了`);
+        continue;
+      }
+      
+      console.log(`处理用户 ${account.username} 的 ${filteredTweets.length} 条推文`);
       
       // 处理每条推文
       for (const tweet of filteredTweets) {
         await processTweet(tweet);
       }
+      
+      // 添加延迟，避免API限制
+      console.log('等待2秒后继续处理下一个用户...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
     } catch (error) {
       console.error(`获取用户 ${account.username} 的推文时出错:`, error);
       stats.errors++;
@@ -188,21 +280,32 @@ async function processAllUsers() {
 
 // 2. 获取用户推文
 async function getUserTweets(userId: string, username: string) {
-  const resp = await client.getTweetApi().getUserTweets({
-    userId: userId
-  });
-  
-  console.log(`用户 ${username} 的推文API调用已完成`);
-  console.log(`找到 ${resp.data.data.length} 条推文`);
-  
-  if (debug) {
-    for(let index = 0; index < resp.data.data.length; index++) {
-      const tweet = resp.data.data[index];
-      debugObject(tweet, `temp-${index}`);
+  try {
+    const resp = await client.getTweetApi().getUserTweets({
+      userId: userId
+    });
+    
+    console.log(`用户 ${username} 的推文API调用已完成`);
+    
+    if (!resp.data.data || resp.data.data.length === 0) {
+      console.log(`用户 ${username} 没有找到推文`);
+      return [];
     }
+    
+    console.log(`找到 ${resp.data.data.length} 条推文`);
+    
+    if (debug) {
+      for(let index = 0; index < resp.data.data.length; index++) {
+        const tweet = resp.data.data[index];
+        debugObject(tweet, `temp-${index}`);
+      }
+    }
+    
+    return resp.data.data;
+  } catch (error) {
+    console.error(`获取用户 ${username} 的推文时出错:`, error);
+    return [];
   }
-  
-  return resp.data.data;
 }
 
 // 3. 过滤推文
@@ -509,12 +612,23 @@ async function saveTweetToSupabase(tweetData: any, userId: number) {
 
 // 获取推文数据并保存到Supabase
 async function fetchAndSaveTweets() {
+  console.log('开始从Twitter获取用户推文...');
   await processAllUsers();
+  console.log('推文获取和保存过程已完成');
 }
 
 async function main() {
-  // 直接获取推文并保存到Supabase
-  await fetchAndSaveTweets();
+  try {
+    console.log('开始执行Twitter推文获取脚本');
+    await fetchAndSaveTweets();
+    console.log('脚本执行完成');
+  } catch (error) {
+    console.error('脚本执行过程中出错:', error);
+    process.exit(1);
+  }
 }
 
-main().catch(console.error);
+main().catch(error => {
+  console.error('程序执行出错:', error);
+  process.exit(1);
+});
