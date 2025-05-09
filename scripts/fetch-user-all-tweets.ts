@@ -26,11 +26,24 @@ import fs from "fs-extra";
 import dotenv from 'dotenv';
 import { createAIService } from "./ai-service";
 import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 
 // 加载环境变量
 dotenv.config();
 
 const debug = (process.env.DEBUG || 'false') === 'true';
+
+// 获取Supabase凭证
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+    console.error('错误: 缺少SUPABASE_URL或SUPABASE_ANON_KEY环境变量');
+    process.exit(1);
+}
+
+// 创建Supabase客户端
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // 初始化Twitter客户端
 let client: any;
@@ -221,7 +234,7 @@ async function getUserId(username: string) {
       
       let userInfo;
       userInfo = await client.getUserApi().getUserByScreenName({screenName: username});
-      console.log(`userInfo: ${JSON.stringify(userInfo)}`);
+    //   console.log(`userInfo: ${JSON.stringify(userInfo)}`);
       const userData = get(userInfo, 'data.user', {});
       const restId = get(userData, 'restId', '');
       return restId;
@@ -337,19 +350,13 @@ async function processTweet(tweet: any) {
       
       // 只有开启调试模式才进行内容类型判断，避免额外的API调用
       let contentType = 'unknown';
-      if (debug) {
-        // 判断内容类型
-        contentType = await judgeContentType(tweetData);
-        console.log(`推文内容类型: ${contentType}`);
+      // 根据简单规则进行判断
+      if (tweetData.images && tweetData.images.length > 0) {
+        contentType = 'post_with_media';
+      } else if (tweetData.videos && tweetData.videos.length > 0) {
+        contentType = 'post_with_video';
       } else {
-        // 根据简单规则进行判断
-        if (tweetData.images && tweetData.images.length > 0) {
-          contentType = 'post_with_media';
-        } else if (tweetData.videos && tweetData.videos.length > 0) {
-          contentType = 'post_with_video';
-        } else {
-          contentType = 'post';
-        }
+        contentType = 'post';
       }
       
       // 将内容类型添加到推文数据中
@@ -369,6 +376,58 @@ async function processTweet(tweet: any) {
   }
 }
 
+// 检查推文是否已存在于 Supabase
+async function checkTweetExists(tweetId: string): Promise<boolean> {
+    try {
+      const { data: existingTweet, error: tweetQueryError } = await supabase
+        .from('cron_twitter_tweets')
+        .select('id')
+        .eq('tweet_id', tweetId)
+        .single();
+      
+      if (tweetQueryError && tweetQueryError.code !== 'PGRST116') {
+        console.error(`查询推文时出错: ${tweetQueryError.message}`);
+        return false;
+      }
+      
+      return !!existingTweet;
+    } catch (error) {
+      console.error(`检查推文是否存在时出错:`, error);
+      return false;
+    }
+  }
+
+  // 保存推文到 supabase
+  async function saveTweetsToSupabase(tweets: any[]) {
+    try {
+        let insertTweets = tweets.map((tweet) => ({
+            tweet_id: tweet.tweetId,
+            user_id: tweet.user.restId,
+            tweet_url: tweet.tweetUrl,
+            full_text: tweet.fullText,
+            created_at: tweet.createdAt,
+            images: tweet.images || [],
+            videos: tweet.videos || [],
+            content_type: tweet.contentType || 'unknown'
+        }));
+      const { data: existingTweets, error: existingTweetsError } = await supabase
+        .from('cron_twitter_tweets')
+        .insert(insertTweets)
+        .select();
+  
+      if (existingTweetsError) {
+        console.error(`保存推文时出错:`, existingTweetsError);
+        throw existingTweetsError;
+      }
+      
+      console.log(`成功保存 ${existingTweets.length} 条推文到 Supabase`);
+    } catch (error) {
+      console.error(`保存推文时出错:`, error);
+      throw error;
+    }
+  }
+  
+
 // 获取用户所有推文
 async function fetchAllUserTweets(username: string, userId: string) {
   try {
@@ -377,7 +436,7 @@ async function fetchAllUserTweets(username: string, userId: string) {
     let allTweets: any[] = [];
     let nextCursor: string | undefined = undefined;
     let pageCount = 0;
-    const maxPages = 10; // 设置最大页数限制，避免无限循环
+    const maxPages = 2; // 设置最大页数限制，避免无限循环
     
     do {
       pageCount++;
@@ -404,6 +463,10 @@ async function fetchAllUserTweets(username: string, userId: string) {
             tweet.runtime_rest_id = userId;
             const tweetData = await processTweet(tweet);
             if (tweetData) {
+              if (await checkTweetExists(tweetData.tweetId)) {
+                console.log(`推文 ${tweetData.tweetId} 已存在，跳过`);
+                continue;
+              }
               allTweets.push(tweetData);
               stats.tweetsCollected++;
             }
@@ -416,6 +479,11 @@ async function fetchAllUserTweets(username: string, userId: string) {
         stats.errors++;
         // 继续尝试下一页
         break;
+      }
+
+      // 保存推文到 supabase
+      if (allTweets.length > 0) {
+        await saveTweetsToSupabase(allTweets);
       }
       
       // 添加延迟，避免API限制
