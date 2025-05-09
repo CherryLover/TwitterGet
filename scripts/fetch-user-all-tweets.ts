@@ -436,7 +436,7 @@ async function fetchAllUserTweets(username: string, userId: string) {
     let allTweets: any[] = [];
     let nextCursor: string | undefined = undefined;
     let pageCount = 0;
-    const maxPages = 2; // 设置最大页数限制，避免无限循环
+    const maxPages = 100; // 设置最大页数限制，避免无限循环
     
     do {
       pageCount++;
