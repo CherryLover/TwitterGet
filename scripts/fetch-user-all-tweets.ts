@@ -376,30 +376,71 @@ async function processTweet(tweet: any) {
   }
 }
 
+// 带有重试机制的函数
+async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries <= 0) {
+      throw error;
+    }
+    console.log(`操作失败，将在 ${delay/1000} 秒后重试，剩余重试次数: ${retries-1}`);
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return withRetry(fn, retries - 1, delay * 2);
+  }
+}
+
 // 检查推文是否已存在于 Supabase
 async function checkTweetExists(tweetId: string): Promise<boolean> {
-    try {
-      const { data: existingTweet, error: tweetQueryError } = await supabase
-        .from('cron_twitter_tweets')
-        .select('id')
-        .eq('tweet_id', tweetId)
-        .single();
-      
-      if (tweetQueryError && tweetQueryError.code !== 'PGRST116') {
-        console.error(`查询推文时出错: ${tweetQueryError.message}`);
-        return false;
-      }
-      
-      return !!existingTweet;
-    } catch (error) {
-      console.error(`检查推文是否存在时出错:`, error);
-      return false;
-    }
-  }
+    return Promise.resolve(false);
+    // console.log(`检查推文是否存在: ${tweetId}`);
+    // return withRetry(async () => {
+    //   try {
+    //     const { data: existingTweet, error: tweetQueryError } = await supabase
+    //       .from('cron_twitter_tweets')
+    //       .select('id')
+    //       .eq('tweet_id', tweetId)
+    //       .single();
+        
+    //     if (tweetQueryError) {
+    //       if (tweetQueryError.code === 'PGRST116') {
+    //         // 未找到记录，表示推文不存在
+    //         console.log(`推文 ${tweetId} 不存在于数据库`);
+    //         return false;
+    //       } else {
+    //         // 其他错误
+    //         console.error(`查询推文时出错: ${tweetQueryError.message}`);
+    //         // 为安全起见，假设推文可能存在
+    //         return true;
+    //       }
+    //     }
+        
+    //     // 如果找到记录，表示推文存在
+    //     if (existingTweet) {
+    //       console.log(`推文 ${tweetId} 已存在于数据库 (ID: ${existingTweet.id})`);
+    //       return true;
+    //     }
 
-  // 保存推文到 supabase
-  async function saveTweetsToSupabase(tweets: any[]) {
+    //     // 未找到记录，表示推文不存在
+    //     console.log(`推文 ${tweetId} 不存在于数据库`);
+    //     return false;
+    //   } catch (error) {
+    //     console.error(`检查推文是否存在时出错:`, error);
+    //     // 为安全起见，假设推文可能存在
+    //     return true;
+    //   }
+    // }, 3, 1000);
+}
+
+// 保存推文到 supabase
+async function saveTweetsToSupabase(tweets: any[]) {
+  return withRetry(async () => {
     try {
+        if (!tweets || tweets.length === 0) {
+          console.log('没有推文需要保存');
+          return;
+        }
+
         let insertTweets = tweets.map((tweet) => ({
             tweet_id: tweet.tweetId,
             user_id: tweet.user.restId,
@@ -410,23 +451,49 @@ async function checkTweetExists(tweetId: string): Promise<boolean> {
             videos: tweet.videos || [],
             content_type: tweet.contentType || 'unknown'
         }));
-      const { data: existingTweets, error: existingTweetsError } = await supabase
-        .from('cron_twitter_tweets')
-        .insert(insertTweets)
-        .select();
-  
-      if (existingTweetsError) {
-        console.error(`保存推文时出错:`, existingTweetsError);
-        throw existingTweetsError;
+
+        // 再次检查是否有重复的推文ID
+        const tweetIds = insertTweets.map(t => t.tweet_id);
+        console.log(`准备保存 ${tweetIds.length} 条推文，推文ID: ${tweetIds.join(', ')}`);
+
+        // 检查是否有重复的推文ID
+        const { data: existingTweetsCheck, error: existingTweetsCheckError } = await supabase
+          .from('cron_twitter_tweets')
+          .select('tweet_id')
+          .in('tweet_id', tweetIds);
+
+        if (existingTweetsCheckError) {
+          console.error(`检查重复推文时出错:`, existingTweetsCheckError);
+        } else if (existingTweetsCheck && existingTweetsCheck.length > 0) {
+          // 过滤掉已存在的推文
+          const existingIds = existingTweetsCheck.map(t => t.tweet_id);
+          console.log(`发现 ${existingIds.length} 条已存在的推文: ${existingIds.join(', ')}`);
+          insertTweets = insertTweets.filter(t => !existingIds.includes(t.tweet_id));
+          console.log(`过滤后剩余 ${insertTweets.length} 条推文需要保存`);
+        }
+
+        if (insertTweets.length === 0) {
+          console.log(`没有新推文需要保存`);
+          return;
+        }
+
+        const { data: savedTweets, error: saveError } = await supabase
+          .from('cron_twitter_tweets')
+          .insert(insertTweets)
+          .select();
+
+        if (saveError) {
+          console.error(`保存推文时出错:`, saveError);
+          throw saveError;
+        }
+        
+        console.log(`成功保存 ${savedTweets?.length || 0} 条推文到 Supabase`);
+      } catch (error) {
+        console.error(`保存推文时出错:`, error);
+        throw error;
       }
-      
-      console.log(`成功保存 ${existingTweets.length} 条推文到 Supabase`);
-    } catch (error) {
-      console.error(`保存推文时出错:`, error);
-      throw error;
-    }
-  }
-  
+  }, 3, 1000);
+}
 
 // 获取用户所有推文
 async function fetchAllUserTweets(username: string, userId: string) {
@@ -459,6 +526,7 @@ async function fetchAllUserTweets(username: string, userId: string) {
           console.log(`处理第 ${pageCount} 页中的 ${filteredTweets.length} 条推文`);
           
           // 处理每条推文
+          let pageTweets: any[] = []; // 存储当前页面的推文
           for (const tweet of filteredTweets) {
             tweet.runtime_rest_id = userId;
             const tweetData = await processTweet(tweet);
@@ -467,8 +535,19 @@ async function fetchAllUserTweets(username: string, userId: string) {
                 console.log(`推文 ${tweetData.tweetId} 已存在，跳过`);
                 continue;
               }
+              pageTweets.push(tweetData);
               allTweets.push(tweetData);
               stats.tweetsCollected++;
+            }
+          }
+
+          // 保存当前页面的推文到 Supabase
+          if (pageTweets.length > 0) {
+            try {
+              await saveTweetsToSupabase(pageTweets);
+            } catch (saveError) {
+              console.error(`保存第 ${pageCount} 页推文时出错:`, saveError);
+              stats.errors++;
             }
           }
         } else {
@@ -479,11 +558,6 @@ async function fetchAllUserTweets(username: string, userId: string) {
         stats.errors++;
         // 继续尝试下一页
         break;
-      }
-
-      // 保存推文到 supabase
-      if (allTweets.length > 0) {
-        await saveTweetsToSupabase(allTweets);
       }
       
       // 添加延迟，避免API限制
