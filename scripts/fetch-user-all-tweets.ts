@@ -166,7 +166,7 @@ function filterRetweets(tweet: any): boolean {
 }
 
 // 获取用户推文
-async function getUserTweets(userId: string, username: string, cursor?: string) {
+async function getUserTweets(userId: string, username: string, cursor?: string, retryCount = 0) {
   try {
     console.log(`开始获取用户 ${username} (ID: ${userId}) 的推文${cursor ? '，cursor: ' + cursor : ''}`);
     
@@ -219,6 +219,14 @@ async function getUserTweets(userId: string, username: string, cursor?: string) 
       }
     }
     
+    // 添加重试逻辑，最多重试3次，每次延迟5秒
+    if (retryCount < 3) {
+      console.log(`将在5秒后进行第${retryCount + 1}次重试...`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      return getUserTweets(userId, username, cursor, retryCount + 1);
+    }
+    
+    console.log(`已达到最大重试次数(3次)，放弃获取`);
     return { tweets: [], nextCursor: undefined };
   }
 }
@@ -556,7 +564,7 @@ async function fetchAllUserTweets(username: string, userId: string) {
       } catch (pageError) {
         console.error(`获取第 ${pageCount} 页推文时出错:`, pageError);
         stats.errors++;
-        // 继续尝试下一页
+        // 已经在 getUserTweets 中实现了重试逻辑，如果仍然失败则跳出循环
         break;
       }
       
