@@ -345,7 +345,8 @@ function filterRetweets(tweet: any): boolean {
   const fullTextContent = get(tweet, "raw.result.legacy.fullText") || get(tweet, "tweet.legacy.fullText") || '';
   const isRetweet = fullTextContent.startsWith('RT @') || get(tweet, "raw.result.legacy.isRetweet");
   if (isRetweet) {
-    console.log("跳过转发推文");
+    // console.log("跳过转发推文", fullTextContent);
+    console.log(`\n跳过转发推文:\n${fullTextContent}\n`);
     return false;
   }
   return true;
