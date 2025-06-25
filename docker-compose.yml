@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  twitter-get:
+    build: .
+    container_name: twitter-get-scripts
+    restart: unless-stopped
+    environment:
+      # 从环境文件或环境变量读取配置
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - DEBUG=${DEBUG:-false}
+      - USER_LIMIT=${USER_LIMIT:-100}
+      - NODE_ENV=production
+      - TZ=Asia/Shanghai
+    volumes:
+      # 挂载账户配置文件（如果需要的话）
+      - ./accounts:/app/accounts:ro
+      # 挂载调试目录（可选）
+      - ./debug:/app/debug
+      # 如果有其他配置文件需要挂载
+      - ./dev-accounts.json:/app/dev-accounts.json:ro
+    # 网络模式（如果需要的话）
+    network_mode: bridge
+    # 内存限制（可选）
+    mem_limit: 512m
+    # CPU 限制（可选）
+    cpus: '0.5' 
