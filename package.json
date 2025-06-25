@@ -5,7 +5,9 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/fs-extra": "^11.0.4",
-    "@types/lodash": "^4.17.16"
+    "@types/lodash": "^4.17.16",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -23,9 +25,9 @@
     "twitter-openapi-typescript": "^0.0.45"
   },
   "scripts": {
-    "fetch-tweets": "ts-node scripts/fetch-user-tweets.ts",
-    "save-to-supabase": "ts-node scripts/save-tweets-to-supabase.ts",
+    "fetch-tweets": "bun scripts/fetch-user-tweets.ts",
+    "save-to-supabase": "bun scripts/save-tweets-to-supabase.ts",
     "analyze-tweet": "bun scripts/analyze_tweet.js",
-    "refresh-users": "ts-node scripts/refresh-users.ts"
+    "refresh-users": "bun scripts/refresh-users.ts"
   }
 }

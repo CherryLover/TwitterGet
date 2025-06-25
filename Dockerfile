@@ -1,6 +1,13 @@
 # 使用官方 Node.js 18 LTS 镜像作为基础镜像
 FROM node:18-alpine AS base
 
+# 安装必要的系统依赖
+RUN apk add --no-cache curl bash
+
+# 安装 Bun
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:$PATH"
+
 # 安装 ts-node 和 typescript 全局依赖
 RUN npm install -g ts-node typescript
 
