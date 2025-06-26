@@ -2,7 +2,7 @@
 FROM node:18-alpine AS base
 
 # 安装必要的系统依赖，并添加 cron
-RUN apk add --no-cache curl bash cron
+RUN apk add --no-cache curl bash dcron
 
 # 安装 Bun
 RUN curl -fsSL https://bun.sh/install | bash
