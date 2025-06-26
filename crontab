@@ -1,0 +1,11 @@
+# 声明环境变量，确保 cron 任务能正确执行
+SHELL=/bin/bash
+
+# 每 30 分钟获取一次最新推文
+*/30 * * * * cd /app && bun run fetch-tweets >> /proc/1/fd/1 2>>/proc/1/fd/2
+
+# 每天凌晨 2 点刷新用户信息
+0 2 * * * cd /app && bun run refresh-users >> /proc/1/fd/1 2>>/proc/1/fd/2
+
+# 重要的 cron 提示：文件末尾必须有一个换行符，否则最后一个任务可能不会被加载。
+

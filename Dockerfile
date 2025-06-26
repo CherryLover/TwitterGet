@@ -1,8 +1,8 @@
 # 使用官方 Node.js 18 LTS 镜像作为基础镜像
 FROM node:18-alpine AS base
 
-# 安装必要的系统依赖
-RUN apk add --no-cache curl bash
+# 安装必要的系统依赖，并添加 cron
+RUN apk add --no-cache curl bash cron
 
 # 安装 Bun
 RUN curl -fsSL https://bun.sh/install | bash
@@ -18,10 +18,16 @@ WORKDIR /app
 COPY package*.json ./
 
 # 安装项目依赖
-RUN npm ci --only=production && npm cache clean --force
+# 注意：这里我们使用 npm install 而不是 npm ci，因为 bun.lockb 可能与 npm ci 不兼容
+# 如果你的依赖是固定的，可以换回 npm ci
+RUN npm install && npm cache clean --force
 
 # 复制项目源代码
 COPY . .
+
+# 复制 crontab 文件并设置权限
+COPY crontab /etc/cron.d/crontab
+RUN chmod 0644 /etc/cron.d/crontab
 
 # 创建必要的目录
 RUN mkdir -p /app/debug && \
@@ -32,15 +38,5 @@ RUN mkdir -p /app/debug && \
 ENV NODE_ENV=production
 ENV TZ=Asia/Shanghai
 
-# 暴露可能需要的端口（虽然这个项目不提供 web 服务）
-# EXPOSE 3000
-
-# 默认命令 - 保持容器运行但不执行任何脚本
-CMD ["tail", "-f", "/dev/null"]
-
-# 你也可以选择以下几种启动方式之一：
-# 1. 直接执行主脚本（如果你想容器启动时自动执行）
-# CMD ["npm", "run", "fetch-tweets"]
-
-# 2. 或者使用 bash 保持容器活跃，便于外部调度
-# CMD ["/bin/sh", "-c", "while true; do sleep 30; done"] 
+# 启动 cron 守护进程并保持容器前台运行
+CMD ["sh", "-c", "crond -f & tail -f /dev/null"] 
